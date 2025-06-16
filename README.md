@@ -5,8 +5,6 @@ Processamento massivo de banco de dados
 
 Prof. Dra. Sahudy Montenegro González
 
-![][image1]
-
 Pedro Henrique Bianco Schneider \- 800467  
 Nicolas Benitiz \- 813037
 
