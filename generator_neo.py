@@ -1,17 +1,21 @@
-import pandas as pd
-import numpy as np
-from faker import Faker
 import random
 import uuid
-import os
 from datetime import datetime
+from faker import Faker
+from neo4j import GraphDatabase, basic_auth
 
-print("Iniciando a geração de dados para a BET...")
+# Configuração do Neo4j
+NEO4J_URI    = 'neo4j://127.0.0.1:7687'
+NEO4J_USER   = 'neo4j'
+NEO4J_PASS   = '12345678'
+NEO4J_DB   = 'pmd'    
 
-NUM_TOTAL_USUARIOS = 20 
-NUM_INFLUENCIADORES_RAIZ = 5  
-PERCENTUAL_SEM_INDICACAO = 0.15 
+NUM_TOTAL_USUARIOS = 50
+NUM_INFLUENCIADORES_RAIZ = 5
 
+NUM_TOTAL_USUARIOS -= NUM_INFLUENCIADORES_RAIZ # Um influenciador também é um usuário
+
+PERCENTUAL_SEM_INDICACAO = 0.15
 CIDADES_COMUNS = [
     'São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza',
     'Belo Horizonte', 'Manaus', 'Curitiba', 'Recife', 'Goiânia'
@@ -20,115 +24,92 @@ CIDADES_COMUNS = [
 fake = Faker('pt_BR')
 
 def gerar_codigo_indicacao(nome):
-    """Gera um código de indicação a partir do nome do usuário."""
     nome_sem_espaco = nome.split(' ')[0].lower()
     numero_aleatorio = random.randint(100, 999)
     return f"{nome_sem_espaco}{numero_aleatorio}"
 
-def criar_diretorio_saida(nome_dir='neo4j_import_data'):
-    """Cria o diretório para salvar os arquivos CSV se não existir."""
-    if not os.path.exists(nome_dir):
-        os.makedirs(nome_dir)
-        print(f"Diretório '{nome_dir}' criado.")
-    return nome_dir
+# Inicializa driver
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASS))
 
-print(f"Gerando {NUM_TOTAL_USUARIOS} usuários...")
-
-usuarios_lista = []
-indicacoes_lista = []
-usuarios_sem_indicacao = int(NUM_TOTAL_USUARIOS * PERCENTUAL_SEM_INDICACAO)
-usuarios_com_indicacao = NUM_TOTAL_USUARIOS - usuarios_sem_indicacao
-
-for i in range(NUM_INFLUENCIADORES_RAIZ + usuarios_sem_indicacao):
-    nome = fake.name()
-    usuarios_lista.append({
-        'userId': str(uuid.uuid4()),
-        'nome': nome,
-        'cidade': random.choice(CIDADES_COMUNS),
-        'data_cadastro': fake.iso8601(),
-        'codigo_indicacao': gerar_codigo_indicacao(nome),
-        'indicado_por_id': None # Não foram indicados
-    })
-
-for i in range(usuarios_com_indicacao):
-    indicador = random.choice(usuarios_lista)
+id_usuario = 0
+def get_id():
+    global id_usuario
+    id_usuario += 1
+    return id_usuario
     
-    nome = fake.name()
-    novo_usuario = {
-        'userId': str(uuid.uuid4()),
-        'nome': nome,
-        'cidade': random.choice(CIDADES_COMUNS),
-        'data_cadastro': fake.iso8601(),
-        'codigo_indicacao': gerar_codigo_indicacao(nome),
-        'indicado_por_id': indicador['userId']
-    }
-    usuarios_lista.append(novo_usuario)
 
-    indicacoes_lista.append({
-        'start_userId': novo_usuario['userId'], 
-        'end_userId': indicador['userId'] 
-    })
+with driver.session() as session:
+    # Limpando dados antigos (opcional)
+    session.run("MATCH (u:Usuario) DETACH DELETE u")
 
-usuarios_df = pd.DataFrame(usuarios_lista)
-indicacoes_df = pd.DataFrame(indicacoes_lista)
-print(f"{len(usuarios_df)} usuários e {len(indicacoes_df)} relações de indicação geradas.")
+    usuarios = []
+    indicacoes = []
+    usuarios_sem_ind = int(NUM_TOTAL_USUARIOS * PERCENTUAL_SEM_INDICACAO)
+    usuarios_com_ind = NUM_TOTAL_USUARIOS - usuarios_sem_ind
 
-print("Simulando histórico de apostas para cada usuário...")
+    # Cria influenciadores raiz e usuários sem indicação
+    for _ in range(NUM_INFLUENCIADORES_RAIZ + usuarios_sem_ind):
+        nome = fake.name()
+        usuario = {
+            'userId': get_id(),
+            'nome': nome,
+            'cidade': random.choice(CIDADES_COMUNS),
+            'dataCadastro': fake.iso8601(),
+            'codigoIndicacao': gerar_codigo_indicacao(nome),
+            'indicadoPor': None
+        }
+        usuarios.append(usuario)
 
-apostas_lista = []
-rel_fez_aposta_lista = []
+    # Cria usuários com indicação
+    for _ in range(usuarios_com_ind):
+        indicador = random.choice(usuarios)
+        nome = fake.name()
+        usuario = {
+            'userId': get_id(),
+            'nome': nome,
+            'cidade': random.choice(CIDADES_COMUNS),
+            'dataCadastro': fake.iso8601(),
+            'codigoIndicacao': gerar_codigo_indicacao(nome),
+            'indicadoPor': indicador['userId']
+        }
+        usuarios.append(usuario)
+        indicacoes.append((usuario['userId'], indicador['userId']))
 
-print("Preparando arquivos CSV para importação no Neo4j...")
-output_dir = criar_diretorio_saida()
+    # Insere nós Usuario
+    print(f"Criando {len(usuarios)} nós de Usuario...")
+    tx = session.begin_transaction()
+    for u in usuarios:
+        tx.run(
+            """
+            CREATE (u:Usuario {
+                userId: $userId,
+                nome: $nome,
+                cidade: $cidade,
+                dataCadastro: datetime($dataCadastro),
+                codigoIndicacao: $codigoIndicacao
+            })
+            """,
+            userId=u['userId'],
+            nome=u['nome'],
+            cidade=u['cidade'],
+            dataCadastro=u['dataCadastro'],
+            codigoIndicacao=u['codigoIndicacao']
+        )
+    tx.commit()
 
-usuarios_nodes = pd.DataFrame({
-    'userId:ID(User)': usuarios_df['userId'],
-    'nome:string': usuarios_df['nome'],
-    'cidade:string': usuarios_df['cidade'],
-    'dataCadastro:datetime': usuarios_df['data_cadastro'],
-    'codigoIndicacao:string': usuarios_df['codigo_indicacao'],
-    ':LABEL': 'Usuario'
-})
-usuarios_nodes.to_csv(os.path.join(output_dir, 'usuarios.csv'), index=False)
-pd.DataFrame(usuarios_nodes.columns).T.to_csv(os.path.join(output_dir, 'usuarios_header.csv'), index=False, header=False)
+    # Insere relações INDICADO_POR
+    print(f"Criando {len(indicacoes)} relações INDICADO_POR...")
+    tx = session.begin_transaction()
+    for child_id, parent_id in indicacoes:
+        tx.run(
+            """
+            MATCH (c:Usuario {userId: $child}), (p:Usuario {userId: $parent})
+            CREATE (c)-[:INDICADO_POR]->(p)
+            """,
+            child=child_id,
+            parent=parent_id
+        )
+    tx.commit()
 
-rel_indicacoes = pd.DataFrame({
-    ':START_ID(User)': indicacoes_df['start_userId'],
-    ':END_ID(User)': indicacoes_df['end_userId'],
-    ':TYPE': 'INDICADO_POR'
-})
-rel_indicacoes.to_csv(os.path.join(output_dir, 'rel_indicacoes.csv'), index=False)
-pd.DataFrame(rel_indicacoes.columns).T.to_csv(os.path.join(output_dir, 'rel_indicacoes_header.csv'), index=False, header=False)
-
-print("\nConcluído!")
-print(f"Arquivos gerados no diretório: '{output_dir}'")
-print("\nPRÓXIMO PASSO: Importar os dados para o Neo4j.")
-
-# Código Cypher para importação no Neo4j
-cypher_code = '''
-// 1. Cria os nós de usuários
-LOAD CSV WITH HEADERS FROM 'file:///usuarios.csv' AS row
-CREATE (:Usuario {
-  userId: row.`userId:ID(User)`,
-  nome: row.`nome:string`,
-  cidade: row.`cidade:string`,
-  dataCadastro: row.`dataCadastro:datetime`,
-  codigoIndicacao: row.`codigoIndicacao:string`
-});
-
-// 2. Cria as relações de indicação entre os usuários
-LOAD CSV WITH HEADERS FROM 'file:///rel_indicacoes.csv' AS row
-MATCH (u1:Usuario {userId: row.`:START_ID(User)`})
-MATCH (u2:Usuario {userId: row.`:END_ID(User)`})
-CREATE (u1)-[:INDICADO_POR]->(u2);
-'''
-
-# Salva o código Cypher em um arquivo separado
-cypher_file_path = os.path.join(output_dir, 'import_cypher.txt')
-with open(cypher_file_path, 'w', encoding='utf-8') as f:
-    f.write(cypher_code)
-
-print(f"\nCódigo Cypher salvo em: '{cypher_file_path}'")
-print("\nPara importar no Neo4j:")
-print("1. Copie os arquivos usuarios.csv e rel_indicacoes.csv para a pasta /import do Neo4j")
-print("2. Execute o código Cypher acima no Neo4j Browser ou cypher-shell")
+print("Importação concluída no Neo4j.")
+driver.close()

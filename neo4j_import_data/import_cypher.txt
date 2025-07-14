@@ -1,0 +1,16 @@
+
+// 1. Cria os nós de usuários
+LOAD CSV WITH HEADERS FROM 'file:///usuarios.csv' AS row
+CREATE (:Usuario {
+  userId: row.`userId:ID(User)`,
+  nome: row.`nome:string`,
+  cidade: row.`cidade:string`,
+  dataCadastro: row.`dataCadastro:datetime`,
+  codigoIndicacao: row.`codigoIndicacao:string`
+});
+
+// 2. Cria as relações de indicação entre os usuários
+LOAD CSV WITH HEADERS FROM 'file:///rel_indicacoes.csv' AS row
+MATCH (u1:Usuario {userId: row.`:START_ID(User)`})
+MATCH (u2:Usuario {userId: row.`:END_ID(User)`})
+CREATE (u1)-[:INDICADO_POR]->(u2);

@@ -2,18 +2,20 @@
 import uuid
 from pymongo import MongoClient
 from collections import Counter
+import math
 
 VALORES = {
     **{str(n): n for n in range(2, 11)},
     'J': 10, 'Q': 10, 'K': 10, 'A': 11
 }
 
-def valor_da_carta(carta):
+def valor_da_carta(carta, is_dealer):
     rank = carta[:-1]
+    divisao = 1.2 if is_dealer else 1
     if rank in VALORES:
-        return VALORES[rank]
+        return math.ceil(VALORES[rank] / divisao)  
     else:
-        return int(rank)
+        return math.ceil(int(rank) / divisao)
 
 def quem_ganhou(placarA, placarB):
     if placarA > placarB:
@@ -24,25 +26,25 @@ def quem_ganhou(placarA, placarB):
         return "Empate"
 
 def generate_random_bet():
-    id_pessoa = str(random.randint(1, 20))
+    id_pessoa = str(random.randint(1, 50))
     valor_apostado = round(random.uniform(1, 1000), 2)
     tipo_jogo = random.choice(['roleta', 'caça-níquel', 'poker', 'blackjack', 'aposta esportiva'])
-    odd = round(random.uniform(1.1, 10), 2)
+    odd = round(random.uniform(1.1, 3), 2)
     
     dados_variaveis = {}
     cliente_ganhou = False
 
     if tipo_jogo == 'caça-níquel':
-        reels = random.choices(['🍒', '🔔', '🍋', '⭐', '7️⃣'], k=3)
+        reels = random.choices(['🍒', '🔔', '🍋', '⭐', '7️⃣'], k=5)
 
         counts = Counter(reels)
         max_count = max(counts.values())
-        porcentagem_vitoria = round(max_count / 3, 2)
+        porcentagem_vitoria = round(max_count / 5, 2)
 
         cliente_ganhou = (max_count >= 2)
         dados_variaveis = {
             'porcentagem_vitoria': porcentagem_vitoria,
-            'reels': random.choices(['🍒', '🔔', '🍋', '⭐', '7️⃣'], k=3),
+            'reels': reels,
             'id_maquina': random.randint(1000, 1020)
         }
 
@@ -54,7 +56,7 @@ def generate_random_bet():
             'numero_jogadores': random.randint(2, 10),
             'mao': mao
         }
-        cliente_ganhou = random.choice([True, False])
+        cliente_ganhou = random.choices([True] * 30 + [False] * 70)[0]
 
     elif tipo_jogo == 'roleta':
         tipo_aposta = random.choice(['cor', 'número'])
@@ -83,7 +85,7 @@ def generate_random_bet():
             else:
                 prob = 18/37
 
-        odd = round(1 / prob, 2)
+        odd = round(1 + prob, 2)
 
         dados_variaveis = {
             'tipo_aposta':       tipo_aposta,
@@ -98,6 +100,7 @@ def generate_random_bet():
         baralho = [r + s for r in ['A','K','Q','J','9','8','7','6','5','4','3','2']
                           for s in ['♠','♥','♦','♣']]
 
+        odd = 2
         total_jogador = 0
         mao_jogador = []
         total_dealer  = 0
@@ -108,10 +111,10 @@ def generate_random_bet():
             baralho.remove(carta)
             
             if vez_do_jogador:
-                total_jogador += valor_da_carta(carta)
+                total_jogador += valor_da_carta(carta, False)
                 mao_jogador += [carta]
             else:
-                total_dealer += valor_da_carta(carta)
+                total_dealer += valor_da_carta(carta, True)
                 mao_dealer += [carta]
             vez_do_jogador = not vez_do_jogador
 
@@ -136,9 +139,6 @@ def generate_random_bet():
             'placar_real': placar_real
         }
         cliente_ganhou = (resultado_apostado == resultado_real)
-        if dados_variaveis["placar_esperado"] and dados_variaveis["placar_real"]:
-           odd += 3
-
 
     aposta = {
         'id_pessoa': id_pessoa,
@@ -148,8 +148,12 @@ def generate_random_bet():
         'odd': odd,
         **dados_variaveis
     }
+    if tipo_jogo == 'caça-níquel':
+        del aposta["odd"]
+        del aposta["cliente_ganhou"]
+
     return aposta
-def insert_bets(n=100, uri='mongodb://localhost:27017/', db_name='pmd-2025', coll_name='apostas'):
+def insert_bets(n=1000, uri='mongodb://localhost:27017/', db_name='pmd-2025', coll_name='apostas'):
     client = MongoClient(uri)
     db = client[db_name]
     collection = db[coll_name]
@@ -158,4 +162,4 @@ def insert_bets(n=100, uri='mongodb://localhost:27017/', db_name='pmd-2025', col
     print(f'Inseridas {len(result.inserted_ids)} apostas.')
 
 if __name__ == '__main__':
-    insert_bets(100)
+    insert_bets(1000)
