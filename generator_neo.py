@@ -1,14 +1,12 @@
 import random
 import uuid
+import os
 from datetime import datetime
 from faker import Faker
+from dotenv import load_dotenv
 from neo4j import GraphDatabase, basic_auth
 
-# Configuração do Neo4j
-NEO4J_URI    = 'neo4j://127.0.0.1:7687'
-NEO4J_USER   = 'neo4j'
-NEO4J_PASS   = '12345678'
-NEO4J_DB   = 'pmd'    
+load_dotenv()
 
 NUM_TOTAL_USUARIOS = 50
 NUM_INFLUENCIADORES_RAIZ = 5
@@ -29,7 +27,7 @@ def gerar_codigo_indicacao(nome):
     return f"{nome_sem_espaco}{numero_aleatorio}"
 
 # Inicializa driver
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASS))
+driver = GraphDatabase.driver(os.getenv("NEO4J_URI"), auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASS")))
 
 id_usuario = 0
 def get_id():

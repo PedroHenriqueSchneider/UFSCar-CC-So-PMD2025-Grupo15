@@ -2,7 +2,11 @@
 import uuid
 from pymongo import MongoClient
 from collections import Counter
+from dotenv import load_dotenv
 import math
+import os
+
+load_dotenv()
 
 VALORES = {
     **{str(n): n for n in range(2, 11)},
@@ -153,7 +157,7 @@ def generate_random_bet():
         del aposta["cliente_ganhou"]
 
     return aposta
-def insert_bets(n=1000, uri='mongodb://localhost:27017/', db_name='pmd-2025', coll_name='apostas'):
+def insert_bets(n=1000, uri=os.getenv("URI_MONGODB"), db_name=os.getenv("MONGO_DB_NAME"), coll_name='apostas'):
     client = MongoClient(uri)
     db = client[db_name]
     collection = db[coll_name]
