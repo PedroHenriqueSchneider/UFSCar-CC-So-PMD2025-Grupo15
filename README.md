@@ -106,3 +106,38 @@ Roleta: O jogador ganha se sua aposta corresponder ao resultado sorteado. Se o t
 Blackjack: O objetivo é derrotar o dealer (a "casa"). O jogador vence se a soma das suas cartas for mais próxima de 21 do que a soma das cartas do dealer, sem ultrapassar 21. O jogador também ganha automaticamente se o dealer ultrapassar 21 (estourar).
 
 Aposta Esportiva: A vitória é direta e ocorre quando a previsão do jogador se concretiza. O resultado apostado (ex: vitória do Time A) deve ser idêntico ao resultado real. Em apostas mais específicas, o placar exato esperado deve corresponder perfeitamente ao placar exato real da partida.
+
+# Como executar o projeto
+
+Como requisito mínimo, ter instalado:
+MongoDB
+Neo4j desktop
+Python
+
+## Primeira etapa - Configurar Neo4j
+1. Preparar ambiente Neo4j. Para isto você deverá:
+Criar uma instância na versão 2025.05.0:
+
+[image]
+
+2. Abrir a pasta onde está a instância:
+[image]
+
+3. Copiar, colar e descompactar o arquivo “configuracoes_neo4j.zip” (que está no git) neste diretório. Perceba que as pastas plugins e conf serão sobrescritas.
+4. Execute.
+
+# Segunda etapa - Configurar MongoDB
+Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
+
+[image]
+
+# Terceira etapa - Gerar dados com Python
+Baixe as dependências do projeto executando:
+	'''pip install -r requirements.txt'''
+ 
+Execute os seguintes códigos para gerar dados no neo4j e mongodb:
+	'''python generator_neo.py'''
+	'''python create_data.py'''
+
+
+
