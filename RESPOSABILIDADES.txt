@@ -11,6 +11,11 @@ transitar pela sua aplicação, das fontes até o resultado das consultas defini
 
 6. o fluxograma entregue na fase inicial de planejamento foi respeitado - Nicolas
 
+7. Mostrar como os dados foram gerados
+a) Mongo - Nicolas
+b) Neo - Pedro
+c) Criar requirements.txt - Nicolas
+
 7. Mostrar os dados nas aplicações:
 a) Neo4j - Pedro
 b) MongoDB - Pedro
