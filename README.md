@@ -85,7 +85,7 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 
 # Tipos de jogos armazenados no MongoDB:
 
-Fazer detalhamento - como funciona cada jogo e como funciona para vencer em cada jogo. Iremos focar apenas nesses jogos.
+O nosso escopo será focado apenas nos cinco jogos abaixo e irão se concentrar apenas nas seguintes formas de vitória.
 
 1. Caça-níquel: porcentagem de vitória, reels (ex: \[ "🍒", "🍒", "🔔" \]), identificador da máquina  
 2. Poker: quantidade de jogadores na mesa, mao (ex: \["A♠", "K♠"\])  
@@ -95,7 +95,7 @@ Fazer detalhamento - como funciona cada jogo e como funciona para vencer em cada
 
 # Funcionamento dos jogos especificados e lógica de vitória
 
-Para que a simulação determine se uma aposta foi vitoriosa ou não, cada jogo possui uma lógica específica de vitória, conforme detalhado abaixo:
+Para que a simulação determine se uma aposta foi vitoriosa ou não, cada jogo possui uma lógica específica de vitória, conforme nosso escopo e detalhado abaixo:
 
 Caça-níquel: A vitória ocorre quando os símbolos (reels) se alinham em uma das combinações pré-definidas como vitoriosas (linhas de pagamento). Por exemplo, obter [ "🍒", "🍒", "🍒" ] em uma linha horizontal ou diagonal resulta em um ganho. A porcentagem de vitória geral da máquina controla a frequência desses resultados a longo prazo.
 
