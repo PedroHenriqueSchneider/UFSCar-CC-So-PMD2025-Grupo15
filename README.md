@@ -111,8 +111,8 @@ Aposta Esportiva: A vitória é direta e ocorre quando a previsão do jogador se
 
 Como requisito mínimo, ter instalado:
 MongoDB, 
-Neo4j desktop, 
-Python, 
+Neo4j desktop e 
+Python 
 
 ## Primeira etapa - Configurar Neo4j
 1. Preparar ambiente Neo4j. Para isto você deverá:
