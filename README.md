@@ -1,3 +1,6 @@
+RELATÓRIO
+https://docs.google.com/document/d/1h14n71aRuy6IGI9rDRbq8ZA_F9txZjfjckxRi_mhjXE/edit?tab=t.0
+
 **Universidade Federal de São Carlos \- Campus Sorocaba**   
 Bacharelado em Ciência da Computação 
 
@@ -18,7 +21,7 @@ Sorocaba
 
 Uma casa de apostas, mais conhecida como cassino virtual no Brasil concentra diferentes jogos e estilos de apostas. Existem jogos que simulam o funcionamento dos cassinos reais, com maquininhas e bingos e existem os criados com foco em ambientes virtuais, como apostas esportivas e o joguinho do avião. Alguns dos jogos de apostas mais famosos atualmente são conhecidos como: Jogo do Tigrinho (Fortune Tiger), Plinko, Mines, Aviator, JetX, Fortune Ox, Spaceman e Penalty Shoot Out. 
 
-Como exemplificação do funcionamento de alguns desses jogos, usaremos o jogo do tigrinho e também uma aposta esportiva.
+Como exemplificação do funcionamento de alguns desses jogos, usaremos o jogo do tigrinho, como é o mais famoso e também uma aposta esportiva.
 O Fortune Tiger é conhecido como um caça-níquel clássico, ao jogá-lo, o usuário precisa alinhar 3 imagens iguais nas 3 fileiras que aparecem. Cada rodada possui cinco linhas de pagamento disponíveis: três na horizontal e duas na diagonal, além de seis símbolos chineses de pagamento, incluindo um especial, que é justamente o tigrinho – uma espécie de coringa. ([link](https://www.em.com.br/apostas/melhores-jogos-de-apostas/)). Um dos motivos do Fortune Tiger ser considerado superior aos demais jogos de aposta são seus multiplicadores, que aumentam o palpite inicial em até 10 vezes.
 
 Nossa proposta é simular o funcionamento de uma casa de apostas (BET), com o intuito de demonstrar de forma mais clara, computacional e lógica como ocorre toda a orquestração dos ganhos, como o esquema é lucrativo e como o topo da pirâmide (pessoa mais famosa e com poder maior de influência) ganha mais dinheiro conforme mais pessoas, que entraram no site por sua indicação, perdem dinheiro na plataforma.
@@ -82,12 +85,10 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 
 # Tipos de jogos armazenados no MongoDB:
 
+Fazer detalhamento - como funciona cada jogo e como funciona para vencer em cada jogo. Iremos focar apenas nesses jogos.
+
 1. Caça-níquel: porcentagem de vitória, reels (ex: \[ "🍒", "🍒", "🔔" \]), identificador da máquina  
 2. Poker: quantidade de jogadores na mesa, mao (ex: \["A♠", "K♠"\])  
 3. Roleta: tipo de aposta (por cor, por número), número escolhido, cor escolhida  
 4. Blackjack: cartas do jogador (ex: \["9♣", "K♦"\]), cartas do dealer (ex: \["7♠", "10♣"\])  
 5. Aposta esportiva: resultado apostado (vitória de um time, ou empate), resultado real, placar exato esperado, placar exato real.  
-   
-
-Podem ser criados ou removidos tipos de jogos no decorrer da realização do projeto.
-
