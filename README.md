@@ -126,12 +126,12 @@ Criar uma instância na versão 2025.05.0:
 3. Copiar, colar e descompactar o arquivo “configuracoes_neo4j.zip” (que está no git) neste diretório. Perceba que as pastas plugins e conf serão sobrescritas.
 4. Execute.
 
-# Segunda etapa - Configurar MongoDB
+## Segunda etapa - Configurar MongoDB
 Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
 
 [image]
 
-# Terceira etapa - Gerar dados com Python
+## Terceira etapa - Gerar dados com Python
 Baixe as dependências do projeto executando:
 	```pip install -r requirements.txt```
  
