@@ -1,0 +1,40 @@
+﻿
+
+1. Deve ser acrescentada uma seção de planejamento inicial - Pedro
+
+3. O grupo deve mostrar que os objetivos foram atingidos - Nicolas
+"Nossa proposta é simular o funcionamento de uma casa de apostas (BET), com o intuito de demonstrar de forma mais clara, computacional e lógica como ocorre toda a orquestração dos ganhos, como o esquema é lucrativo e como o topo da pirâmide (pessoa mais famosa e com poder maior de influência) ganha mais dinheiro conforme mais pessoas, que entraram no site por sua indicação, perdem dinheiro na plataforma."
+
+5. fazer o fluxograma - Nicolas
+"Para ajudar a construir o minimundo, criem um fluxograma de como os dados vão
+transitar pela sua aplicação, das fontes até o resultado das consultas definidas" - Montenegro, Sahudy
+
+6. o fluxograma entregue na fase inicial de planejamento foi respeitado - Nicolas
+
+7. Mostrar os dados nas aplicações:
+a) Neo4j - Pedro
+b) MongoDB - Pedro
+obs: Fazer consultas simples para mostrar que funciona
+
+8. Como a integração foi feita (usando aquele .jar) - Nicolas
+https://neo4j.com/labs/apoc/4.0/database-integration/mongodb/
+https://neo4j.com/labs/apoc/4.0/database-integration/mongodb/#mongodb-dependencies
+
+9. Explicar consultas - Ambos (Nicolas é ímpar, Pedro é par)
+
+10. Mostrar que os requisitos mínimos foram atingidos - Pedro
+• Utilizar dois modelos de dados NoSQL diferentes para armazenamento ou um modelo +
+Apache Spark.
+• Integração direta entre as tecnologias escolhidas: usar os conectores disponíveis.
+• Interface não é necessária!
+
+11. Opcional: Pode ser acrescentado um tópico de dificuldades encontradas - Ambos
+
+Nicolas 
+1. Explicar como os dados de aposta foram gerados
+2. Explicar consultas ímpares
+
+Pedro
+1. Explicar objetivo do projeto
+2. Explicar como os dados dos usuários foram gerados
+3. Explicar consultas pares
