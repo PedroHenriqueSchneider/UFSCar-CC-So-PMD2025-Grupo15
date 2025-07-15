@@ -95,6 +95,11 @@ def generate_random_bet():
             'cor_sorteada':      cor_sorteada,
         }
 
+        if tipo_aposta == 'número':
+            del dados_variaveis["cor_escolhida"]
+        else:
+            del dados_variaveis["numero_escolhido"]
+
 
     elif tipo_jogo == 'blackjack':
         baralho = [r + s for r in ['A','K','Q','J','9','8','7','6','5','4','3','2']

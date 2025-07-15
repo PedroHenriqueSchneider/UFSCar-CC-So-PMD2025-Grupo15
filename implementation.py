@@ -48,7 +48,6 @@ def calcular_lucro(row):
 
     return - valor_ganho
 
-
 def consulta1_jogos_mais_lucro():
     """
         1. Quais jogos mais dão lucro para a BET?
@@ -210,7 +209,7 @@ def consulta5_quantos_usuarios_usam_codigo():
     print(f"Porcentagem de usuários que utilizaram código: {porcentagem:.2f}%")
 
 # consulta = int(input("Qual consulta você deseja realizar? "))
-consulta = 5
+consulta = 1
 
 if consulta == 1:
     consulta1_jogos_mais_lucro()
