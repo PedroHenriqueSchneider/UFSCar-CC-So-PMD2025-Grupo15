@@ -133,11 +133,11 @@ Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
 
 # Terceira etapa - Gerar dados com Python
 Baixe as dependências do projeto executando:
-	'''pip install -r requirements.txt'''
+	```pip install -r requirements.txt```
  
 Execute os seguintes códigos para gerar dados no neo4j e mongodb:
-	'''python generator_neo.py'''
-	'''python create_data.py'''
+	```python generator_neo.py```
+	```python create_data.py```
 
 
 
