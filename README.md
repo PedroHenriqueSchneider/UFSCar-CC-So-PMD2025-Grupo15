@@ -91,4 +91,18 @@ Fazer detalhamento - como funciona cada jogo e como funciona para vencer em cada
 2. Poker: quantidade de jogadores na mesa, mao (ex: \["A♠", "K♠"\])  
 3. Roleta: tipo de aposta (por cor, por número), número escolhido, cor escolhida  
 4. Blackjack: cartas do jogador (ex: \["9♣", "K♦"\]), cartas do dealer (ex: \["7♠", "10♣"\])  
-5. Aposta esportiva: resultado apostado (vitória de um time, ou empate), resultado real, placar exato esperado, placar exato real.  
+5. Aposta esportiva: resultado apostado (vitória de um time, ou empate), resultado real, placar exato esperado, placar exato real.
+
+# Funcionamento dos jogos especificados e lógica de vitória
+
+Para que a simulação determine se uma aposta foi vitoriosa ou não, cada jogo possui uma lógica específica de vitória, conforme detalhado abaixo:
+
+Caça-níquel: A vitória ocorre quando os símbolos (reels) se alinham em uma das combinações pré-definidas como vitoriosas (linhas de pagamento). Por exemplo, obter [ "🍒", "🍒", "🍒" ] em uma linha horizontal ou diagonal resulta em um ganho. A porcentagem de vitória geral da máquina controla a frequência desses resultados a longo prazo.
+
+Poker: O jogador vence a rodada se, ao final, sua mão de cartas, combinada com as cartas comunitárias na mesa, formar o jogo de cinco cartas mais forte que o de todos os outros jogadores na mesa, seguindo a classificação padrão das mãos de poker (ex: um Full House vence um Flush).
+
+Roleta: O jogador ganha se sua aposta corresponder ao resultado sorteado. Se o tipo de aposta foi "por cor" e a cor escolhida foi 'vermelho', ele vence se a bola cair em qualquer número vermelho. Se a aposta foi em um número escolhido específico, ele só vence se a bola cair exatamente naquele número.
+
+Blackjack: O objetivo é derrotar o dealer (a "casa"). O jogador vence se a soma das suas cartas for mais próxima de 21 do que a soma das cartas do dealer, sem ultrapassar 21. O jogador também ganha automaticamente se o dealer ultrapassar 21 (estourar).
+
+Aposta Esportiva: A vitória é direta e ocorre quando a previsão do jogador se concretiza. O resultado apostado (ex: vitória do Time A) deve ser idêntico ao resultado real. Em apostas mais específicas, o placar exato esperado deve corresponder perfeitamente ao placar exato real da partida.
