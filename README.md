@@ -216,14 +216,14 @@ O desenvolvimento do protótipo demonstra que os objetivos propostos são alcan�
 O trabalho resulta em um sistema capaz de fornecer uma visão clara e quantitativa da distribuição de lucros em uma casa de apostas. A simulação evidencia que o modelo de comissão por perdas é um poderoso motor financeiro, muitas vezes mais significativo do que a própria margem da casa nos jogos.
 
 
-### Como executar o projeto
+### Como executar o projeto?
 
 Como requisito mínimo, ter instalado:
 MongoDB, 
 Neo4j desktop e 
 Python 
 
-## Primeira etapa - Configurar Neo4j
+### Primeira etapa - Configurar Neo4j
 1. Preparar ambiente Neo4j. Para isto você deverá:
 Criar uma instância na versão 2025.05.0:
 
@@ -240,7 +240,7 @@ Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
 
 [image]
 
-## Terceira etapa - Gerar dados com Python
+### Terceira etapa - Gerar dados com Python
 Baixe as dependências do projeto executando:
 	```pip install -r requirements.txt```
  
