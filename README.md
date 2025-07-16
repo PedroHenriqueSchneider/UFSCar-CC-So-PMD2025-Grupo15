@@ -67,7 +67,7 @@ Por não enfrentar as limitações dos bancos de dados relacionais, um banco de 
 
 # Discussão sobre as técnologias utilizadas
 
-### Análise teórica das escolhas e o por que do MongoDB
+### Análise teórica das escolhas (MongoDB)
 
 **Problema 1**: A Heterogeneidade dos Dados de Jogos
 
@@ -91,7 +91,7 @@ Problema 2: Alto Volume e Velocidade de Inserção
 
 **A Solução do MongoDB**: MongoDB é projetado para escalabilidade horizontal (sharding). Isso significa que, à medida que o volume de apostas cresce para bilhões de registros, se pode distribuir a coleção de apostas por múltiplos servidores. Isso permite que o sistema mantenha uma alta performance de escrita e leitura, simplesmente adicionando mais máquinas à sua infraestrutura, um processo que é nativamente suportado pelo MongoDB.
 
-### 2. Análise teórica das escolhas e o por que do Neo4j
+### 2. Análise teórica das escolhas (Neo4j)
    
 O Neo4j é um banco de dados orientado a grafos. Sua estrutura fundamental são Nós e Arestas. Nós representam entidades (ex: um Usuário), e Relacionamentos representam como esses nós se conectam (ex: um usuário INDICOU outro).
 
