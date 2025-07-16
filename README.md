@@ -245,6 +245,7 @@ Execute os seguintes códigos para gerar dados no neo4j e mongodb:
 	```python generator_neo.py```
 	```python create_data.py```
 
+-------------------------------------------------------------------------------- 
 Mermaid code para o fluxograma (rode o código em https://www.mermaidchart.com/):
 
 ```
