@@ -105,7 +105,7 @@ A metodologia proposta é o desenvolvimento de um protótipo funcional. A aborda
 
 # Fundamentação teórica
 
-### Por que as tecnologias escolhidas são as melhores para atender a sua aplicação?
+### Por que as tecnologias escolhidas são as melhores para atender a aplicação?
 
 Por não enfrentar as limitações dos bancos de dados relacionais, um banco de dados não relacional oferece uma estrutura mais flexível, capaz de armazenar dados semi-estruturados e com natureza hierárquica. Isso o torna mais adequado à nossa proposta, considerando que lidamos com um grande volume de dados, com uma frequência muito maior de inserções do que de consultas, além de uma hierarquia bem definida entre nós. Essa hierarquia possui uma grande profundidade, o que torna a estrutura em árvore mais adequada do que o modelo relacional. Dessa forma, vamos trabalhar com: 
 
