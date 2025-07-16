@@ -398,6 +398,9 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
 <img width="1243" height="827" alt="image" src="https://github.com/user-attachments/assets/fa55c1b5-32f4-4c12-b122-44fd12611fe0" />
 
+Em relação ao Neo4j temos esse grafo
+<img width="1086" height="1008" alt="image" src="https://github.com/user-attachments/assets/086b6d59-4938-4fe0-ac63-438dc6cae34b" />
+
 # Conclusões
 
 ### Retomada dos Objetivos
