@@ -1,6 +1,3 @@
-RELATÓRIO
-https://docs.google.com/document/d/1h14n71aRuy6IGI9rDRbq8ZA_F9txZjfjckxRi_mhjXE/edit?tab=t.0
-
 **Universidade Federal de São Carlos \- Campus Sorocaba**   
 Bacharelado em Ciência da Computação 
 
