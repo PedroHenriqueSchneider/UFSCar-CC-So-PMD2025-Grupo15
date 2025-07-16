@@ -399,7 +399,10 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 <img width="1243" height="827" alt="image" src="https://github.com/user-attachments/assets/fa55c1b5-32f4-4c12-b122-44fd12611fe0" />
 
 Em relação ao Neo4j temos esse grafo
-<img width="1086" height="1008" alt="image" src="https://github.com/user-attachments/assets/086b6d59-4938-4fe0-ac63-438dc6cae34b" />
+<img width="1934" height="1056" alt="image" src="https://github.com/user-attachments/assets/8875799d-a2fb-44e7-b8b9-6e52e66f1996" />
+
+<img width="1662" height="1464" alt="image" src="https://github.com/user-attachments/assets/3d156675-ecab-40fa-9ee2-a9fac13c5a13" />
+
 
 # Conclusões
 
