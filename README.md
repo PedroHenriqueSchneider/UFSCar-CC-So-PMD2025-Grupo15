@@ -245,5 +245,89 @@ Execute os seguintes códigos para gerar dados no neo4j e mongodb:
 	```python generator_neo.py```
 	```python create_data.py```
 
+Mermaid code para o fluxograma (rode o código em https://www.mermaidchart.com/):
+
+```
+graph TD
+    subgraph "FASE 1: Configuração e Modelagem"
+        A1["Definir Modelo em Neo4j:
+          &#45; Nó: Usuario (nome, id, etc)
+          &#45; Relação: INDICOU"] --> DB_Neo4j[(Neo4j)];
+        A2["Definir Schema em MongoDB:
+          &#45; Coleção: apostas
+          &#45; Documento: id_usuario, jogo, valor,
+            resultado, dados_especificos"] --> DB_Mongo[(MongoDB)];
+    end
+
+    subgraph "FASE 2: Geração de Dados Sintéticos"
+        B1["Input: Coletar Dados Externos
+          &#45; Nomes (Geração aleatória)
+          &#45; Cidades (Geração aleatória)"] --> B2{Script Python};
+        B2 --> B3["1&#46; Gerar Usuários
+          (com e sem código de indicação)"];
+        B3 --> B4["2&#46; Popular Neo4j
+          &#45; Criar nós 'Usuario'
+          &#45; Criar relações 'INDICOU'
+          para formar a rede/grafo"];
+        B4 --> DB_Neo4j;
+        
+        B3 --> B5["3&#46; Simular Apostas por Usuário"];
+        B5 --> B6["Lógica do Jogo Específico
+          (Caça-níquel, Roleta, etc.)"];
+        B6 -- Vitória --> B7["Resultado: Vitória
+          Calcular ganho (valor * odd)"];
+        B6 -- Derrota --> B8[Resultado: Derrota];
+        B7 --> B9["4&#46; Formatar Documento da Aposta"];
+        B8 --> B9;
+        B9 --> B10["5&#46; Popular MongoDB
+          &#45; Inserir documento na coleção 'apostas'"];
+        B10 --> DB_Mongo;
+    end
+
+    subgraph "FASE 3: Simulação da Lógica de Comissão (Aplicação Python)"
+        C1{Aposta Perdida} ----> C2[Ler Aposta de 'Derrota' do MongoDB];
+        C2 --> C3["Obter:
+          &#45; ID do Usuário Perdedor
+          &#45; Valor Apostado"];
+        C3 --> C4["Consultar Rede no Neo4j
+          'Encontrar a cadeia de indicadores
+          para o usuário perdedor'"];
+        DB_Mongo -- Dados da Aposta --> C2;
+        C4 -- Caminho de Indicação --> C6;
+        DB_Neo4j -- Rede de Usuários --> C4;
+        C4 -- Sem Indicador --> C5["Fim do Cálculo.
+          Lucro 100% para a casa."];
+
+        C6{Caminho Encontrado?}
+        C6 -- Sim --> C7["Calcular Comissões em Cascata:
+          &#45; 1&#46; Nível 1 (direto): 10% do valor perdido
+          &#45; 2&#46; Nível >1 (indireto): 50% da comissão do nível anterior"];
+        C7 --> C8["Output: Registrar/Armazenar
+          comissões calculadas por usuário"];
+        C6 -- Não --> C5;
+    end
+
+    subgraph "FASE 4: Análise e Consultas"
+        D1["Input: Escolher Consulta Analítica
+          (Ex: 'Qual jogo mais dá lucro?')"] --> D2{Executar Consulta Híbrida};
+        
+        D2 -- Ex: Lucro por Usuário Indicador --> D3["1&#46; Neo4j: Encontrar todos os usuários
+          indicados (diretos/indiretos) por um Influenciador X."];
+        D3 -- Lista de IDs --> D4["2&#46; MongoDB: Buscar todas as apostas
+          perdidas por esses IDs."];
+        D4 -- Apostas Perdidas --> D5["3&#46; Python: Calcular a comissão para X
+          em cada aposta e somar o total."];
+        
+        D2 -- Ex: Lucro por Jogo --> D6["1&#46; MongoDB: Agrupar por 'jogo'&#46;
+          2&#46; Calcular (Soma de Derrotas) - (Soma de Ganhos)"];
+
+        D5 --> D_OUT["Apresentar Resultado
+          (Tabela, Gráfico, Ranking)"];
+        D6 --> D_OUT;
+    end
+
+    %% Ligações entre as Fases
+    A1 & A2 --> B1;
+```
 
 
