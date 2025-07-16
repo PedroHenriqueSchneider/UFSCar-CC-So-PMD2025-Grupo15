@@ -1,4 +1,4 @@
-**Universidade Federal de São Carlos \- Campus Sorocaba**   
+**Universidade Federal de São Carlos \-**   
 Bacharelado em Ciência da Computação 
 
 Processamento massivo de banco de dados
@@ -8,12 +8,10 @@ Prof. Dra. Sahudy Montenegro González
 Pedro Henrique Bianco Schneider \- 800467  
 Nicolas Benitiz \- 813037
 
-## Casa de apostas \- BETs
-
 Sorocaba 
+16/07/2025
 
-18/06/2025
-
+# Casa de apostas \- BETs - O universo dos cassinos digitais
 # Resumo 
 Este relatório detalha o desenvolvimento de um protótipo para simular o funcionamento das apostas e ganhos de uma casa de apostas online (BET). O contexto é o crescimento expressivo dessas plataformas no Brasil e a falta de transparência sobre seus modelos de lucratividade, especialmente os que envolvem redes de influenciadores. O objetivo principal do trabalho é demonstrar, de forma computacional e lógica, como ocorre a orquestração dos ganhos, com foco no sistema de comissões por indicação. A metodologia adotada envolve a integração de dois bancos de dados NoSQL, MongoDB para armazenar a variedade de dados de apostas e Neo4j para modelar a hierarquia de relacionamentos entre usuários. 
 
