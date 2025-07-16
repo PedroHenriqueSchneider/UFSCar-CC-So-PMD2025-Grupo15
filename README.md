@@ -221,18 +221,13 @@ Python
 1. Preparar ambiente Neo4j. Para isto você deverá:
 Criar uma instância na versão 2025.05.0:
 
-[image]
-
 2. Abrir a pasta onde está a instância:
-[image]
 
 3. Copiar, colar e descompactar o arquivo “configuracoes_neo4j.zip” (que está no git) neste diretório. Perceba que as pastas plugins e conf serão sobrescritas.
 4. Execute.
 
 ## Segunda etapa - Configurar MongoDB
 Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
-
-[image]
 
 ### Terceira etapa - Gerar dados com Python
 Baixe as dependências do projeto executando:
