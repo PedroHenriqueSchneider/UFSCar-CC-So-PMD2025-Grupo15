@@ -1,10 +1,10 @@
 import random
-import uuid
 import os
 from datetime import datetime
 from faker import Faker
 from dotenv import load_dotenv
 from neo4j import GraphDatabase, basic_auth
+from collections import defaultdict
 
 load_dotenv()
 
@@ -35,6 +35,22 @@ def get_id():
     id_usuario += 1
     return id_usuario
     
+def creates_cycle(child_id, parent_id, edges):
+    adj = defaultdict(list)
+    for c, p in edges:
+        adj[c].append(p)
+
+    stack = [parent_id]
+    visited = set()
+    while stack:
+        node = stack.pop()
+        if node == child_id:
+            return True
+        for nxt in adj.get(node, []):
+            if nxt not in visited:
+                visited.add(nxt)
+                stack.append(nxt)
+    return False
 
 with driver.session() as session:
     # Limpando dados antigos (opcional)
@@ -70,6 +86,8 @@ with driver.session() as session:
             'codigoIndicacao': gerar_codigo_indicacao(nome),
             'indicadoPor': indicador['userId']
         }
+        while creates_cycle(usuario['userId'], indicador['userId'], indicacoes):
+            indicador = random.choice(usuarios)
         usuarios.append(usuario)
         indicacoes.append((usuario['userId'], indicador['userId']))
 

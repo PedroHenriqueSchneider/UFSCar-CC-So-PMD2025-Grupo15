@@ -81,16 +81,14 @@ def generate_random_bet():
 
         if tipo_aposta == 'número':
             cliente_ganhou = (numero_escolhido == numero_sorteado)
-            prob = 1/37
+            odd = 4
         else:
             cliente_ganhou = (cor_escolhida == cor_sorteada)
             if cor_escolhida == 'verde':
-                prob = 1/37
+                odd = 4
             else:
-                prob = 18/37
-
-        odd = round(1 + prob, 2)
-
+                odd = 1.2
+        
         dados_variaveis = {
             'tipo_aposta':       tipo_aposta,
             'numero_escolhido':  numero_escolhido,
@@ -159,7 +157,6 @@ def generate_random_bet():
     }
     if tipo_jogo == 'caça-níquel':
         del aposta["odd"]
-        del aposta["cliente_ganhou"]
 
     return aposta
 def insert_bets(n=1000, uri=os.getenv("URI_MONGODB"), db_name=os.getenv("MONGO_DB_NAME"), coll_name='apostas'):
