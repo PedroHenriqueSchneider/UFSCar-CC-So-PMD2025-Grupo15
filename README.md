@@ -189,7 +189,7 @@ nome = fake.name()
 fake.iso8601()
 ```
 
-Para as demais informações, como cidade e codigo_indicacao, utilizamos a biblioteca random, que é nativa do python:
+Para as demais informações, como cidade e codigo_indicacao, foi utilizado a biblioteca random, que é nativa do python:
 ```
 # Exemplo: Cidade
 CIDADES_COMUNS = [
