@@ -383,20 +383,568 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 
 1. Quais jogos mais dão lucro para a BET?
 <img width="992" height="697" alt="image" src="https://github.com/user-attachments/assets/14650585-a57f-4c51-943f-a76b402b05cc" />
+
+```
+def consulta1_jogos_mais_lucro():
+    """
+        1. Quais jogos mais dão lucro para a BET?
+    """
+    cursor = coll.find(
+    {},
+        {
+            "valor_apostado": 1,
+            "cliente_ganhou": 1,
+            "tipo_jogo": 1,
+            "odd": 1,
+            "porcentagem_vitoria": 1,
+            "resultado_real": 1,
+            "resultado_apostado": 1,
+        }
+    )
+
+    df = pd.DataFrame(list(cursor))
+
+    df['lucro'] = df.apply(calcular_lucro, axis=1)
+    lucro_por_jogo = (
+        df.groupby('tipo_jogo')['lucro']
+        .sum()
+        .sort_values(ascending=False)
+    )
+
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(lucro_por_jogo.index, lucro_por_jogo.values)
+
+    for bar in bars:
+        altura = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2, 
+            altura + max(lucro_por_jogo.values) * 0.01,
+            f"Lucro TOTAL (R$)\n{altura:,.2f}",  
+            ha='center',                        
+            va='bottom',                     
+            fontsize=9
+        )
+
+    plt.ylabel('Lucro Total (R$)')
+    plt.xlabel('Tipo de Jogo')
+    plt.title('Lucro por Tipo de Jogo (do mais ao menos lucrativo)')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
+```
+
 2. Quais são os usuários que mais receberam dinheiro a partir da perda dos outros?
 <img width="1917" height="972" alt="image" src="https://github.com/user-attachments/assets/2210f2c1-c20e-4c0d-b4aa-427b4c7e126f" />
+
+```
+def consulta2_top_influencers():
+    """
+        2. Quais são os usuários que mais receberam dinheiro a partir da perda dos outros?
+    """
+
+    cypher = """
+        CALL apoc.mongo.find(
+            'mongodb://localhost:27017/pmd-2025', 
+            { cliente_ganhou: false }, 
+            {
+                collection: 'apostas',
+                projection: {
+                    id_pessoa:           1,
+                    valor_apostado:      1,
+                    cliente_ganhou:      1,
+                    tipo_jogo:           1,
+                    odd:                 1,
+                    porcentagem_vitoria: 1,
+                    resultado_real:      1,
+                    resultado_apostado:  1
+                },
+                sort: {}
+            }
+        ) YIELD value
+
+        WITH 
+        toInteger(value.id_pessoa) AS id_pessoa_perdedor,
+        value.valor_apostado      AS valor_apostado,
+        value.cliente_ganhou      AS cliente_ganhou,
+        value.tipo_jogo           AS tipo_jogo,
+        value.odd                 AS odd,
+        value.porcentagem_vitoria AS porcentagem_vitoria,
+        value.resultado_real      AS resultado_real,
+        value.resultado_apostado  AS resultado_apostado
+
+        MATCH (perdedor:Usuario { userId: id_pessoa_perdedor })
+
+        OPTIONAL MATCH p=(perdedor)-[*1..]->(beneficiado:Usuario)
+        WHERE beneficiado IS NOT NULL
+
+        RETURN
+        id_pessoa_perdedor,
+        perdedor.nome             AS nome_perdedor,
+        valor_apostado,
+        cliente_ganhou,
+        tipo_jogo,
+        odd,
+        porcentagem_vitoria,
+        resultado_real,
+        resultado_apostado,
+        collect(DISTINCT beneficiado.nome) AS beneficiado,
+        collect(DISTINCT length(p))        AS distancia_ao_beneficiado
+        ORDER BY id_pessoa_perdedor
+    """
+
+    with neo_driver.session() as session:
+        records = session.run(cypher).data()
+    neo_driver.close()
+
+    ganhos_por_beneficiado = {}
+
+    for record in records:
+        perda = record["valor_apostado"]
+        beneficiados = record["beneficiado"]
+        distancias = record["distancia_ao_beneficiado"]
+
+        for i in range(len(beneficiados)):
+            beneficiado_nome = beneficiados[i]
+            distancia = distancias[i]
+
+            if distancia >= 1:
+                percentual_ganho = 0.10 * (0.5 ** (distancia - 1))
+                ganho = perda * percentual_ganho
+                
+                ganhos_por_beneficiado[beneficiado_nome] = ganhos_por_beneficiado.get(beneficiado_nome, 0) + ganho
+        
+    df = pd.DataFrame(list(ganhos_por_beneficiado.items()), columns=['influencer', 'total_gain'])
+
+    df = df.sort_values(by='total_gain', ascending=False)
+
+    if not df.empty:
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(df['influencer'], df['total_gain'])
+        plt.xlabel("Influenciador")
+        plt.ylabel("Ganhos a partir das perdas (R$)")
+        plt.title("Top Usuários por Ganhos de Perdas de Outros")
+        plt.xticks(rotation=45, ha='right')
+
+        top_val = df['total_gain'].max()
+        for bar in bars:
+            h = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width()/2,
+                h + top_val * 0.01,
+                f"{h:,.2f}",
+                ha='center',
+                va='bottom',
+                fontsize=9
+            )
+
+        plt.tight_layout()
+        plt.show()
+```
+
 3. Quais são os usuários que mais receberam dinheiro somente a partir de apostas? Pode ser interessante para identificar se um usuário está utilizando métodos ilícitos para ganhar as apostas.
 <img width="1916" height="873" alt="image" src="https://github.com/user-attachments/assets/712414f6-b9ae-4a41-927d-d74e1f4b1ac0" />
+
+```
+
+def coonsulta3_top_apostadores():
+    """
+    Quais são os usuários que mais receberam dinheiro somente a partir de apostas?
+    """
+    cypher = """
+        CALL apoc.mongo.find(
+        'mongodb://localhost:27017/pmd-2025', 
+        {}, 
+        {
+            collection: 'apostas',
+            projection: {
+            id_pessoa:            1,
+            valor_apostado:       1,
+            cliente_ganhou:       1,
+            tipo_jogo:            1,
+            odd:                  1,
+            porcentagem_vitoria:  1,
+            resultado_real:       1,
+            resultado_apostado:   1
+            },
+            sort: {}
+        }
+        ) YIELD value
+
+        WITH 
+        toInteger(value.id_pessoa) AS id_pessoa,
+        value.valor_apostado       AS valor_apostado,
+        value.cliente_ganhou       AS cliente_ganhou,
+        value.tipo_jogo            AS tipo_jogo,
+        value.odd                  AS odd,
+        value.porcentagem_vitoria  AS porcentagem_vitoria,
+        value.resultado_real       AS resultado_real,
+        value.resultado_apostado   AS resultado_apostado
+
+        MATCH (u:Usuario { userId: id_pessoa })
+        RETURN
+        id_pessoa,
+        u.nome                     AS nome,
+        valor_apostado,
+        cliente_ganhou,
+        tipo_jogo,
+        odd,
+        porcentagem_vitoria,
+        resultado_real,
+        resultado_apostado;
+    """
+    with neo_driver.session() as session:
+        records = session.run(cypher).data()
+    neo_driver.close()
+
+    df = pd.DataFrame(records)
+
+    df['lucro'] = df.apply(calcular_lucro, axis=1)
+    df['recebido'] = df['lucro'].apply(lambda x: -x)
+
+    receb_por_usuario = df.groupby('nome')['recebido'] \
+                        .sum() \
+                        .sort_values(ascending=False)
+
+    top_recebedores = receb_por_usuario[:10]
+
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(top_recebedores.index, top_recebedores.values)
+
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            h + top_recebedores.max() * 0.01,
+            f"{h:,.2f}",
+            ha='center',
+            va='bottom',
+            fontsize=9
+        )
+
+    plt.ylabel('Dinheiro Recebido (R$)')
+    plt.xlabel('Usuário')
+    plt.title('Top Usuários por Dinheiro Recebido em Apostas')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
+```
+
 4. Qual usuário conseguiu trazer mais novos usuários diretos?
 <img width="1497" height="887" alt="image" src="https://github.com/user-attachments/assets/85511195-954a-47af-90ac-e8f7fe4b529b" />
+
+```
+
+def consulta4_mais_trouxe_novos_usuarios():
+    """
+        Qual usuário conseguiu trazer mais novos usuários diretos?
+    """
+    cypher = """
+    MATCH (u:Usuario)-[:INDICADO_POR]->(influencer:Usuario)
+    RETURN influencer.nome AS Usuario, count(u) AS TotalApontamentosDiretos
+    ORDER BY TotalApontamentosDiretos DESC
+    """
+
+    with neo_driver.session() as session:
+        records_apontamentos = session.run(cypher).data()
+    neo_driver.close()
+
+    df_apontamentos = pd.DataFrame([
+        {"Usuario": record["Usuario"], "TotalApontamentosDiretos": record["TotalApontamentosDiretos"]}
+        for record in records_apontamentos
+    ])
+
+    df_top_10 = df_apontamentos.head(10)
+
+    plt.figure(figsize=(12, 7))
+    bars = plt.bar(df_top_10['Usuario'], df_top_10['TotalApontamentosDiretos'], color='skyblue')
+    
+    plt.xlabel("Usuário", fontsize=12)
+    plt.ylabel("Número de Apontamentos Diretos", fontsize=12)
+    plt.title("Top 10 Usuários por Novos Apontamentos Diretos", fontsize=14)
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            height + max(df_top_10['TotalApontamentosDiretos']) * 0.01,
+            f"{int(height)}",
+            ha='center',
+            va='bottom',
+            fontsize=9
+        )
+
+    plt.tight_layout()
+    plt.show()
+```
+
 5. Qual a porcentagem de usuários que utilizam código?
 <img width="527" height="42" alt="image" src="https://github.com/user-attachments/assets/57af53f5-78ce-4ec8-b966-b8e21c8d4f42" />
+
+```
+
+def consulta5_quantos_usuarios_usam_codigo():
+    """
+    Qual a porcentagem de usuários que utilizam código?
+    """
+
+    cypher = """
+    CALL apoc.mongo.find(
+      'mongodb://localhost:27017/pmd-2025',
+      {},
+      {
+        collection: 'apostas',
+        projection: { id_pessoa: 1 },
+        sort: {}
+      }
+    ) YIELD value
+    WITH collect(DISTINCT toInteger(value.id_pessoa)) AS bettors
+
+    WITH size(bettors) AS total_bettors
+
+    MATCH (u:Usuario)-[:INDICADO_POR]->()
+    WITH total_bettors, count(DISTINCT u.userId) AS usaram_codigo
+
+    RETURN
+      CASE 
+        WHEN total_bettors = 0 THEN 0.0 
+        ELSE toFloat(usaram_codigo) / total_bettors * 100 
+      END AS porcentagem
+    """
+
+    with neo_driver.session() as session:
+        porcentagem = session.run(cypher).single()["porcentagem"]
+    neo_driver.close()
+
+    print(f"Porcentagem de usuários que utilizaram código: {porcentagem:.2f}%")
+```
+
 6. Qual a porcentagem de vitória para cada jogo?
 <img width="1238" height="826" alt="image" src="https://github.com/user-attachments/assets/6f6ad142-ad14-4356-8498-970a74bc740e" />
+
+```
+
+def consulta6_porcentagem_vitoria_cada_jogo():
+    """
+    Qual a porcentagem de vitória para cada jogo?
+    """
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$tipo_jogo",
+                "total_apostas": {"$sum": 1},
+                "total_vitorias": {
+                    "$sum": {
+                    "$cond": [
+                        {"$eq": ["$cliente_ganhou", True]},
+                        1,
+                        0 
+                    ]
+                }
+                }, 
+            }
+        },
+        {
+            "$sort": {"porcentagem_vitoria": -1}
+        }
+    ]
+
+    data = list(coll.aggregate(pipeline))
+
+    df = pd.DataFrame(data)
+
+    df['porcentagem_vitoria'] = df['total_vitorias'] / df['total_apostas']
+
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(df['_id'], df['porcentagem_vitoria'], color='lightgreen')
+    
+    plt.xlabel("Tipo de Jogo", fontsize=12)
+    plt.ylabel("Porcentagem de Vitória (%)", fontsize=12)
+    plt.title("Porcentagem de Vitórias por Tipo de Jogo", fontsize=14)
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            height + max(df['porcentagem_vitoria']) * 0.01,
+            f"{height:.2f}%",
+            ha='center',
+            va='bottom',
+            fontsize=9
+        )
+
+    plt.tight_layout()
+    plt.show()
+```
+
 7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?
 <img width="1247" height="827" alt="image" src="https://github.com/user-attachments/assets/91d072aa-488a-4dec-8aa7-6cd99e2f2f4e" />
+
+```
+
+def consulta7_quem_mais_indicou():
+    """
+    Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?
+    """
+    cypher = """
+    MATCH (u:Usuario)
+    OPTIONAL MATCH (ref:Usuario)-[:INDICADO_POR*1..]->(u)
+    WITH u, COUNT(DISTINCT ref) AS total_indicacoes
+    RETURN 
+      u.nome              AS nome, 
+      total_indicacoes
+    ORDER BY total_indicacoes DESC
+    LIMIT 10
+    """
+    with neo_driver.session() as session:
+        result = session.run(cypher)
+        dados = [(record["nome"], record["total_indicacoes"]) 
+                 for record in result]
+    neo_driver.close()
+
+    if not dados:
+        print("Nenhum dado retornado.")
+        return
+
+    nomes, contagens = zip(*dados)
+
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(nomes, contagens)
+    plt.xlabel("Nome do Usuário")
+    plt.ylabel("Quantidade de Indicações")
+    plt.title("Usuários por Indicações Diretas e Indiretas")
+    plt.xticks(rotation=45, ha="right")
+
+    # Adiciona o valor acima de cada barra
+    max_val = max(contagens)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            h + max_val * 0.01,
+            f"{h}",
+            ha="center",
+            va="bottom",
+            fontsize=9
+        )
+
+    plt.tight_layout()
+    plt.show()
+```
+
 8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
 <img width="1243" height="827" alt="image" src="https://github.com/user-attachments/assets/fa55c1b5-32f4-4c12-b122-44fd12611fe0" />
+
+```
+
+def consulta8_quanto_influencer_ganhou(nome_influenciador="Sophia Ramos"):
+    """
+    Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
+    """
+
+    cypher = """
+        CALL apoc.mongo.find(
+            'mongodb://localhost:27017/pmd-2025', 
+            { cliente_ganhou: false }, 
+            {
+                collection: 'apostas',
+                projection: {
+                    id_pessoa:           1,
+                    valor_apostado:      1,
+                    cliente_ganhou:      1,
+                    tipo_jogo:           1,
+                    odd:                 1,
+                    porcentagem_vitoria: 1,
+                    resultado_real:      1,
+                    resultado_apostado:  1
+                },
+                sort: {}
+            }
+        ) YIELD value
+
+        WITH 
+        toInteger(value.id_pessoa) AS id_pessoa_perdedor,
+        value.valor_apostado      AS valor_apostado,
+        value.cliente_ganhou      AS cliente_ganhou,
+        value.tipo_jogo           AS tipo_jogo,
+        value.odd                 AS odd,
+        value.porcentagem_vitoria AS porcentagem_vitoria,
+        value.resultado_real      AS resultado_real,
+        value.resultado_apostado  AS resultado_apostado
+
+        MATCH (perdedor:Usuario { userId: id_pessoa_perdedor })
+
+        OPTIONAL MATCH p=(perdedor)-[*1..]->(beneficiado:Usuario{nome: $nome})
+        WHERE beneficiado IS NOT NULL
+
+        RETURN
+        id_pessoa_perdedor,
+        perdedor.nome             AS nome_perdedor,
+        valor_apostado,
+        cliente_ganhou,
+        tipo_jogo,
+        odd,
+        porcentagem_vitoria,
+        resultado_real,
+        resultado_apostado,
+        collect(DISTINCT beneficiado.nome) AS beneficiado,
+        collect(DISTINCT length(p))        AS distancia_ao_beneficiado
+        ORDER BY id_pessoa_perdedor
+    """
+
+    with neo_driver.session() as session:
+        records = session.run(cypher, nome=nome_influenciador).data()
+    neo_driver.close()
+
+    ganhos_por_beneficiado = {}
+
+    for record in records:
+        perda = record["valor_apostado"]
+        beneficiados = record["beneficiado"]
+        distancias = record["distancia_ao_beneficiado"]
+
+        for i in range(len(beneficiados)):
+            beneficiado_nome = beneficiados[i]
+            distancia = distancias[i]
+
+            if distancia >= 1:
+                percentual_ganho = 0.10 * (0.5 ** (distancia - 1))
+                ganho = perda * percentual_ganho
+                
+                ganhos_por_beneficiado[beneficiado_nome] = ganhos_por_beneficiado.get(beneficiado_nome, 0) + ganho
+        
+    df = pd.DataFrame(list(ganhos_por_beneficiado.items()), columns=['influencer', 'total_gain'])
+
+    df = df.sort_values(by='total_gain', ascending=False)
+
+    if not df.empty:
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(df['influencer'], df['total_gain'])
+        plt.xlabel("Influenciador")
+        plt.ylabel("Ganhos a partir das perdas (R$)")
+        plt.title("Top Usuários por Ganhos de Perdas de Outros")
+        plt.xticks(rotation=45, ha='right')
+
+        top_val = df['total_gain'].max()
+        for bar in bars:
+            h = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width()/2,
+                h + top_val * 0.01,
+                f"{h:,.2f}",
+                ha='center',
+                va='bottom',
+                fontsize=9
+            )
+
+        plt.tight_layout()
+        plt.show()
+```
 
 Em relação ao Neo4j temos esse grafo
 <img width="1934" height="1056" alt="image" src="https://github.com/user-attachments/assets/8875799d-a2fb-44e7-b8b9-6e52e66f1996" />
