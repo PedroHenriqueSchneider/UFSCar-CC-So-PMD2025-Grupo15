@@ -80,11 +80,11 @@ Para que a simulação determine se uma aposta foi vitoriosa ou não, cada jogo 
 
 # Objetivos
 
-###Objetivo Geral
+### Objetivo Geral
 
 Simular o funcionamento de uma casa de apostas (BET) para demonstrar de forma clara, computacional e lógica como ocorre a orquestração dos ganhos e a lucratividade do esquema de indicações.
 
-###Objetivos Específicos
+### Objetivos Específicos
 
 - **Modelar** a estrutura de dados de usuários e suas relações de indicação utilizando um banco de dados de grafos (Neo4j).
 - **Estruturar** o armazenamento de diferentes tipos de jogos e apostas em um banco de dados de documentos (MongoDB), garantindo flexibilidade de esquema.
