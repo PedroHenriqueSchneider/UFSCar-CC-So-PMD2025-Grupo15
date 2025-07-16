@@ -462,7 +462,7 @@ def consulta7_quem_mais_indicou():
     plt.tight_layout()
     plt.show()
 
-def consulta8_quanto_influencer_ganhou(nome_influenciador="Samuel Machado"):
+def consulta8_quanto_influencer_ganhou(nome_influenciador="Sophia Ramos"):
     """
     Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
     """
@@ -518,7 +518,7 @@ def consulta8_quanto_influencer_ganhou(nome_influenciador="Samuel Machado"):
     """
 
     with neo_driver.session() as session:
-        records = session.run(cypher).data()
+        records = session.run(cypher, nome=nome_influenciador).data()
     neo_driver.close()
 
     ganhos_por_beneficiado = {}
@@ -565,22 +565,43 @@ def consulta8_quanto_influencer_ganhou(nome_influenciador="Samuel Machado"):
         plt.tight_layout()
         plt.show()
 
+def exibir_menu():
+    print("\n" + "="*40)
+    print("        Menu de Consultas de Apostas       ")
+    print("="*40)
+    print("1. Quais jogos mais dão lucro para a BET?")
+    print("2. Quais são os usuários que mais receberam dinheiro a partir da perda dos outros?")
+    print("3. Quais são os usuários que mais receberam dinheiro somente a partir de apostas?")
+    print("4. Qual usuário conseguiu trazer mais novos usuários diretos?")
+    print("5. Qual a porcentagem de usuários que utilizam código?")
+    print("6. Qual a porcentagem de vitória para cada jogo?")
+    print("7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?")
+    print("8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?")
+    print("0. Sair")
+    print("="*40)
 
-consulta = 8
-
-if consulta == 1:
-    consulta1_jogos_mais_lucro()
-elif consulta == 2:
-    consulta2_top_influencers()
-elif consulta == 3:
-    coonsulta3_top_apostadores()
-elif consulta == 4:
-    consulta4_mais_trouxe_novos_usuarios()
-elif consulta == 5:
-    consulta5_quantos_usuarios_usam_codigo()
-elif consulta == 6:
-    consulta6_porcentagem_vitoria_cada_jogo()
-elif consulta == 7:
-    consulta7_quem_mais_indicou()
-elif consulta == 8:
-    consulta8_quanto_influencer_ganhou()
+while True:
+    exibir_menu()
+    escolha = int(input("Digite o número da consulta desejada: "))
+    
+    if escolha == 1:
+        consulta1_jogos_mais_lucro()
+    elif escolha == 2:
+        consulta2_top_influencers()
+    elif escolha == 3:
+        coonsulta3_top_apostadores()
+    elif escolha == 4:
+        consulta4_mais_trouxe_novos_usuarios()
+    elif escolha == 5:
+        consulta5_quantos_usuarios_usam_codigo()
+    elif escolha == 6:
+        consulta6_porcentagem_vitoria_cada_jogo()
+    elif escolha == 7:
+        consulta7_quem_mais_indicou()
+    elif escolha == 8:
+        consulta8_quanto_influencer_ganhou()
+    elif escolha == 0:
+        print("Saindo do programa. Até mais!")
+        break
+    else:
+        print("Opção inválida. Por favor, digite um número entre 0 e 8.")
