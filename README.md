@@ -201,8 +201,7 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 5. Qual a porcentagem de usuários que utilizam código?  
 6. Qual a porcentagem de vitória para cada jogo?  
 7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?  
-8. Em quais horários a casa de apostas registra maior porcentagem de derrotas?  
-9. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
+8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
 
 # Conclusões
 
