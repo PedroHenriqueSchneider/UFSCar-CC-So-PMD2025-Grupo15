@@ -69,12 +69,14 @@ Por não enfrentar as limitações dos bancos de dados relacionais, um banco de 
 
 ### Análise teórica das escolhas e o por que do MongoDB
 
-Problema 1: A Heterogeneidade dos Dados de Jogos
+**Problema 1**: A Heterogeneidade dos Dados de Jogos
 
-O Problema Teórico: Os jogos simulados são inerentemente diferentes. Uma aposta no Caça-níquel precisa armazenar os símbolos que apareceram nos rolos (ex: reels: ["🍒", "🍒", "🔔"]). Uma aposta em Roleta precisa armazenar a cor ou o número escolhido (ex: tipo_aposta: "cor", valor: "vermelho"). Uma aposta em Blackjack precisa das cartas do jogador e do dealer.
+**O Problema Teórico**: Os jogos simulados são inerentemente diferentes. Uma aposta no Caça-níquel precisa armazenar os símbolos que apareceram nos rolos (ex: reels: ["🍒", "🍒", "🔔"]). Uma aposta em Roleta precisa armazenar a cor ou o número escolhido (ex: tipo_aposta: "cor", valor: "vermelho"). Uma aposta em Blackjack precisa das cartas do jogador e do dealer.
 
 A Ineficiência de um Banco Relacional (SQL): Em um banco de dados relacional (como MySQL ou PostgreSQL), se tem péssimas opções:
+
 Tabela Única com Colunas Nulas: Criar uma única tabela Apostas com colunas para todos os possíveis campos de todos os jogos (reels, cartas_jogador, cor_escolhida, etc.). Para uma aposta de roleta, as colunas reels e cartas_jogador seriam nulas. Isso gera um desperdício de espaço e uma estrutura de dados "suja" e confusa.
+
 Múltiplas Tabelas: Criar uma tabela para cada tipo de aposta (apostas_caçaniquel, apostas_roleta, etc.). Isso resolve o problema das colunas nulas, mas cria um novo: como consultar de forma eficiente "todas as apostas perdidas pelo usuário X", se elas estão espalhadas em várias tabelas? Seria necessário fazer consultas complexas (com UNION) e a manutenção se tornaria complicada.
 
 A Solução do MongoDB: O modelo de documentos resolve isso de forma elegante. Todas as apostas podem ser armazenadas em uma única "coleção" chamada apostas. Cada documento dentro dessa coleção tem autonomia para ter os campos que precisa.
@@ -85,19 +87,23 @@ Conclusão Teórica: O MongoDB foi escolhido porque seu esquema dinâmico se ada
 
 Problema 2: Alto Volume e Velocidade de Inserção
 
-O Problema Teórico: Casas de apostas geram um volume massivo de transações (apostas) em um curto espaço de tempo. A aplicação precisa "escrever" (inserir) dados de forma muito rápida e contínua.
-A Solução do MongoDB: MongoDB é projetado para escalabilidade horizontal (sharding). Isso significa que, à medida que o volume de apostas cresce para bilhões de registros, se pode distribuir a coleção de apostas por múltiplos servidores. Isso permite que o sistema mantenha uma alta performance de escrita e leitura, simplesmente adicionando mais máquinas à sua infraestrutura, um processo que é nativamente suportado pelo MongoDB.
+**O Problema Teórico**: Casas de apostas geram um volume massivo de transações (apostas) em um curto espaço de tempo. A aplicação precisa "escrever" (inserir) dados de forma muito rápida e contínua.
+
+**A Solução do MongoDB**: MongoDB é projetado para escalabilidade horizontal (sharding). Isso significa que, à medida que o volume de apostas cresce para bilhões de registros, se pode distribuir a coleção de apostas por múltiplos servidores. Isso permite que o sistema mantenha uma alta performance de escrita e leitura, simplesmente adicionando mais máquinas à sua infraestrutura, um processo que é nativamente suportado pelo MongoDB.
 
 ### 2. Análise teórica das escolhas e o por que do Neo4j
    
 O Neo4j é um banco de dados orientado a grafos. Sua estrutura fundamental são Nós e Arestas. Nós representam entidades (ex: um Usuário), e Relacionamentos representam como esses nós se conectam (ex: um usuário INDICOU outro).
-Problema 1: A Natureza Hierárquica das Indicações
+
+**Problema 1**: A Natureza Hierárquica das Indicações
+
 O Problema Teórico: O núcleo da análise de comissões é a rede de indicações. "Usuário A indicou B, que indicou C, que indicou Z". Esta é, por definição, uma estrutura de grafo. A pergunta "Quanto o usuário A ganha quando Z perde?" exige que seja percorrido esse caminho de relacionamentos.
 A Ineficiência de Outros Bancos:
 Em um Banco Relacional (SQL): seria modelado isso com uma chave estrangeira id_indicador na tabela de usuários. Para encontrar o caminho de Z até A, seria necessário executar uma série de JOINs da tabela com ela mesma (chamadas de recursive JOINs ou self-JOINs). Para cada nível de profundidade na hierarquia, a consulta se torna mais lenta e complexa. Em redes profundas, isso se torna impraticável.
+
 Em um Banco de Documentos (MongoDB): seria possível aninhar os indicados dentro de um documento de usuário, mas isso tornaria a consulta reversa ("quem indicou X?") muito difícil. A outra opção é usar o operador $graphLookup, mas ele não é tão performático ou intuitivo quanto uma consulta nativa em um banco de grafos para esse tipo de problema.
+
 A Solução do Neo4j: Neo4j foi criado exatamente para isso. Ele armazena os relacionamentos como elementos de primeira classe. Percorrer o caminho de Z até A é a operação mais fundamental e otimizada que ele pode fazer. A consulta, escrita na linguagem Cypher, é declarativa e intuitiva:
-Cypher
 // Encontre o caminho entre o usuário 'A' e o usuário 'Z'
 MATCH caminho = (indicador:Usuario {nome: 'A'})-[:INDICOU*]->(perdedor:Usuario {nome: 'Z'})
 RETURN caminho
@@ -105,7 +111,8 @@ O * no relacionamento [:INDICOU*] significa "percorra este relacionamento por um
 
 ### Conclusão Teórica: 
 O Neo4j foi escolhido porque o seu modelo de dados de grafo mapeia diretamente a estrutura hierárquica do problema de indicações. Ele é otimizado para consultas de travessia de grafos (encontrar caminhos e conexões), tornando as perguntas sobre a rede de influenciadores extremamente rápidas e simples de formular, algo que seria proibitivamente lento e complexo em outros modelos de banco de dados.
-Conclusão: A Sinergia (Por que não usar apenas um?)
+
+**Conclusão**: A Sinergia (Por que não usar apenas um?)
 Por que não usar só Neo4j para tudo? Porque armazenar bilhões de apostas como nós individuais no Neo4j poluiria o grafo com dados transacionais que não se beneficiam da análise de relacionamentos, tornando as consultas de travessia (seu ponto forte) mais lentas.
 Por que não usar só MongoDB para tudo? Porque analisar relações hierárquicas complexas no MongoDB exigiria lógica pesada na aplicação e consultas ineficientes, anulando a agilidade do banco.
 
