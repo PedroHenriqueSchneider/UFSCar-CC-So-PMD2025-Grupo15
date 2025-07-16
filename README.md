@@ -1,4 +1,4 @@
-**Universidade Federal de São Carlos \- Campus Sorocaba**   
+**Universidade Federal de São Carlos \-**   
 Bacharelado em Ciência da Computação 
 
 Processamento massivo de banco de dados
@@ -8,12 +8,10 @@ Prof. Dra. Sahudy Montenegro González
 Pedro Henrique Bianco Schneider \- 800467  
 Nicolas Benitiz \- 813037
 
-## Casa de apostas \- BETs
-
 Sorocaba 
+16/07/2025
 
-18/06/2025
-
+# Casa de apostas \- BETs - O universo dos cassinos digitais
 # Resumo 
 Este relatório detalha o desenvolvimento de um protótipo para simular o funcionamento das apostas e ganhos de uma casa de apostas online (BET). O contexto é o crescimento expressivo dessas plataformas no Brasil e a falta de transparência sobre seus modelos de lucratividade, especialmente os que envolvem redes de influenciadores. O objetivo principal do trabalho é demonstrar, de forma computacional e lógica, como ocorre a orquestração dos ganhos, com foco no sistema de comissões por indicação. A metodologia adotada envolve a integração de dois bancos de dados NoSQL, MongoDB para armazenar a variedade de dados de apostas e Neo4j para modelar a hierarquia de relacionamentos entre usuários. 
 
@@ -177,7 +175,194 @@ Conforme o planejamento, a fase inicial do desenvolvimento concentrou-se na conf
 
 **Modelagem em MongoDB**: Foi criada uma coleção chamada apostas. Cada documento nesta coleção representa uma aposta e contém campos comuns (id_usuario, valor_apostado) e campos específicos do jogo, como reels para o "Jogo do Tigrinho" ou placar_real para apostas esportivas.
 
-**Geração de Dados**: Iniciou-se o desenvolvimento de scripts em Python para popular os bancos. Nomes foram extraídos de listas do IBGE, e dados de jogos são gerados aleatoriamente, respeitando a lógica de cada modalidade.
+**Geração de Dados**: Iniciou-se o desenvolvimento de scripts em Python para popular os bancos. Nomes foram gerados aleatoriamente pela biblioteca faker, e dados de jogos são gerados aleatoriamente, respeitando a lógica de cada modalidade.
+
+Como explicado anteriormente, o NoSQL orientado a grafos é útil pois permite armazenar as informações dos usuários, além de mostrar a relação INDICOU.
+Desta forma, existem duas etapas:
+
+Gerar dados fictícios dos usuários.
+Arquivo: generator_neo.py
+	
+Foi utilizado a biblioteca faker para inventar o nome das pessoas, e data de cadastro:
+```
+nome = fake.name()
+fake.iso8601()
+```
+
+Para as demais informações, como cidade e codigo_indicacao, foi utilizado a biblioteca random, que é nativa do python:
+```
+# Exemplo: Cidade
+CIDADES_COMUNS = [
+    'São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza',
+    'Belo Horizonte', 'Manaus', 'Curitiba', 'Recife', 'Goiânia'
+]
+
+cidade = random.choice(CIDADES_COMUNS)
+```
+
+No escopo inicial, foi ressaltado que existem pessoas que não usam o código de ninguém (podendo ser um influenciador, ou não). Para atingir este objetivo, no ínicio do código informamos a quantidade total de usuários e de influenciadores, e o percentual de pessoas que não utilizam código:
+
+```
+NUM_TOTAL_USUARIOS = 50
+NUM_INFLUENCIADORES_RAIZ = 5
+
+NUM_TOTAL_USUARIOS -= NUM_INFLUENCIADORES_RAIZ # Um influenciador também é um usuário
+
+PERCENTUAL_SEM_INDICACAO = 0.15
+...
+
+# Neste momento, criamos os jogadores sem terem 
+for _ in range(NUM_INFLUENCIADORES_RAIZ + usuarios_sem_ind):
+        nome = fake.name()
+        usuario = {
+            'userId': get_id(),
+            'nome': nome,
+            'cidade': random.choice(CIDADES_COMUNS),
+            'dataCadastro': fake.iso8601(),
+            'codigoIndicacao': gerar_codigo_indicacao(nome),
+            'indicadoPor': None
+        }
+        usuarios.append(usuario)
+```
+
+Também é informado que não seria permitido gerar ciclos no grafo por conta do sistema de remuneração sobre perda. Foi implementado isto no código também:
+
+```
+ # Enquanto escolher um indicador que gere ciclo, vai mudando
+        while creates_cycle(usuario['userId'], indicador['userId'], indicacoes):
+            indicador = random.choice(usuarios)
+        usuarios.append(usuario)
+        indicacoes.append((usuario['userId'], indicador['userId']))
+```
+
+Gerar dados fictícios para apostas.
+Arquivo: create_data.py
+
+Existem os seguintes tipos de aposta: 'roleta', 'caça-níquel', 'poker', 'blackjack', 'aposta esportiva'.
+
+Caça-níquel:
+
+```
+ reels = random.choices(['🍒', '🔔', '🍋', '⭐', '7️⃣'], k=5)
+
+        counts = Counter(reels)
+        max_count = max(counts.values())
+        porcentagem_vitoria = round(max_count / 5, 2)
+
+        cliente_ganhou = (max_count >= 2)
+        dados_variaveis = {
+            'porcentagem_vitoria': porcentagem_vitoria,
+            'reels': reels,
+            'id_maquina': random.randint(1000, 1020)
+        }
+```
+
+Poker:
+
+```
+baralho = [r + s for r in ['A','K','Q','J','10','9','8','7','6','5','4','3','2']
+                          for s in ['♠','♥','♦','♣']]
+        mao = random.sample(baralho, k=2)
+        dados_variaveis = {
+            'numero_jogadores': random.randint(2, 10),
+            'mao': mao
+        }
+        cliente_ganhou = random.choices([True] * 30 + [False] * 70)[0]
+```
+
+OBS: Para garantir que a casa sempre terá mais vitórias, foi colocado que o usuário só tem 30% de chances de vitória.
+
+Roleta:
+
+```
+tipo_aposta = random.choice(['cor', 'número'])
+        if tipo_aposta == 'número':
+            numero_escolhido = random.randint(0, 36)
+            cor_escolhida    = None
+        else:
+            cor_escolhida    = random.choice(['vermelho','preto','verde'])
+            numero_escolhido = None
+
+        numero_sorteado = random.randint(0, 36)
+        if numero_sorteado == 0:
+            cor_sorteada = 'verde'
+        else:
+            cor_sorteada = 'vermelho' if numero_sorteado in {
+                *range(1,11), *range(19,29)
+            } else 'preto'
+
+        if tipo_aposta == 'número':
+            cliente_ganhou = (numero_escolhido == numero_sorteado)
+            odd = 4
+        else:
+            cliente_ganhou = (cor_escolhida == cor_sorteada)
+            if cor_escolhida == 'verde':
+                odd = 4
+            else:
+                odd = 1.5
+
+        dados_variaveis = {
+            'tipo_aposta':       tipo_aposta,
+            'numero_escolhido':  numero_escolhido,
+            'cor_escolhida':     cor_escolhida,
+            'numero_sorteado':   numero_sorteado,
+            'cor_sorteada':      cor_sorteada,
+        }
+
+        if tipo_aposta == 'número':
+            del dados_variaveis["cor_escolhida"]
+        else:
+            del dados_variaveis["numero_escolhido"]
+```
+
+OBS: Perceba que a odd varia conforme o tipo de aposta, pois algumas apostas tem menos chances de acontecer e, portanto, merecem maior retorno.
+
+BlackJack:
+
+```
+    baralho = [r + s for r in ['A','K','Q','J','9','8','7','6','5','4','3','2']
+                          for s in ['♠','♥','♦','♣']]
+
+        odd = 2
+        total_jogador = 0
+        mao_jogador = []
+        total_dealer  = 0
+        mao_dealer = []
+        vez_do_jogador = True
+        while total_jogador <= 21 and total_dealer <= 21:
+            carta = random.choice(baralho)
+            baralho.remove(carta)
+            
+            if vez_do_jogador:
+                total_jogador += valor_da_carta(carta, False)
+                mao_jogador += [carta]
+            else:
+                total_dealer += valor_da_carta(carta, True)
+                mao_dealer += [carta]
+            vez_do_jogador = not vez_do_jogador
+
+        cliente_ganhou = total_jogador <= 21
+```
+
+Explicação: O jogo termina quando um dos jogadores consegue somar mais de 21. Este jogador é o perdedor.
+OBS: Para aumentar a probabilidade da casa vencer, as cartas que a mesa compra valem 20% a menos, de forma que é mais difícil eles somarem 21.
+
+Aposta esportiva:
+
+```
+placar_esperado = (random.randint(0,5), random.randint(0,5))
+        placar_real = (random.randint(0,5), random.randint(0,5))
+        resultado_apostado = quem_ganhou(placar_esperado[0], placar_esperado[1])
+        resultado_real = quem_ganhou(placar_real[0], placar_real[1])
+        dados_variaveis = {
+            'resultado_apostado': resultado_apostado,
+            'resultado_real': resultado_real,
+            'placar_esperado': placar_esperado,
+            'placar_real': placar_real
+        }
+        cliente_ganhou = (resultado_apostado == resultado_real)
+```
+O cliente ganha se acertar o resultado do jogo: vitória, derrota ou empate.
 
 **Apresentação e Análise de Resultados** (Potenciais): O protótipo foi projetado para responder a consultas complexas que cruzam dados dos dois bancos. A aplicação em Python executa a consulta no Neo4j para encontrar, por exemplo, todos os usuários indicados por "X", e depois busca no MongoDB todas as apostas perdidas por esses usuários para calcular a comissão de "X". Os resultados que o sistema pode gerar incluem:
 
@@ -201,8 +386,7 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 5. Qual a porcentagem de usuários que utilizam código?  
 6. Qual a porcentagem de vitória para cada jogo?  
 7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?  
-8. Em quais horários a casa de apostas registra maior porcentagem de derrotas?  
-9. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
+8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
 
 # Conclusões
 
@@ -224,18 +408,13 @@ Python
 1. Preparar ambiente Neo4j. Para isto você deverá:
 Criar uma instância na versão 2025.05.0:
 
-[image]
-
 2. Abrir a pasta onde está a instância:
-[image]
 
 3. Copiar, colar e descompactar o arquivo “configuracoes_neo4j.zip” (que está no git) neste diretório. Perceba que as pastas plugins e conf serão sobrescritas.
 4. Execute.
 
 ## Segunda etapa - Configurar MongoDB
 Crie um database chamado “pmd-2025”, com um schema chamado “apostas”:
-
-[image]
 
 ### Terceira etapa - Gerar dados com Python
 Baixe as dependências do projeto executando:
@@ -245,5 +424,90 @@ Execute os seguintes códigos para gerar dados no neo4j e mongodb:
 	```python generator_neo.py```
 	```python create_data.py```
 
+-------------------------------------------------------------------------------- 
+Mermaid code para o fluxograma (rode o código em https://www.mermaidchart.com/):
+
+```
+graph TD
+    subgraph "FASE 1: Configuração e Modelagem"
+        A1["Definir Modelo em Neo4j:
+          &#45; Nó: Usuario (nome, id, etc)
+          &#45; Relação: INDICOU"] --> DB_Neo4j[(Neo4j)];
+        A2["Definir Schema em MongoDB:
+          &#45; Coleção: apostas
+          &#45; Documento: id_usuario, jogo, valor,
+            resultado, dados_especificos"] --> DB_Mongo[(MongoDB)];
+    end
+
+    subgraph "FASE 2: Geração de Dados Sintéticos"
+        B1["Input: Coletar Dados Externos
+          &#45; Nomes (Geração aleatória)
+          &#45; Cidades (Geração aleatória)"] --> B2{Script Python};
+        B2 --> B3["1&#46; Gerar Usuários
+          (com e sem código de indicação)"];
+        B3 --> B4["2&#46; Popular Neo4j
+          &#45; Criar nós 'Usuario'
+          &#45; Criar relações 'INDICOU'
+          para formar a rede/grafo"];
+        B4 --> DB_Neo4j;
+        
+        B3 --> B5["3&#46; Simular Apostas por Usuário"];
+        B5 --> B6["Lógica do Jogo Específico
+          (Caça-níquel, Roleta, etc.)"];
+        B6 -- Vitória --> B7["Resultado: Vitória
+          Calcular ganho (valor * odd)"];
+        B6 -- Derrota --> B8[Resultado: Derrota];
+        B7 --> B9["4&#46; Formatar Documento da Aposta"];
+        B8 --> B9;
+        B9 --> B10["5&#46; Popular MongoDB
+          &#45; Inserir documento na coleção 'apostas'"];
+        B10 --> DB_Mongo;
+    end
+
+    subgraph "FASE 3: Simulação da Lógica de Comissão (Aplicação Python)"
+        C1{Aposta Perdida} ----> C2[Ler Aposta de 'Derrota' do MongoDB];
+        C2 --> C3["Obter:
+          &#45; ID do Usuário Perdedor
+          &#45; Valor Apostado"];
+        C3 --> C4["Consultar Rede no Neo4j
+          'Encontrar a cadeia de indicadores
+          para o usuário perdedor'"];
+        DB_Mongo -- Dados da Aposta --> C2;
+        C4 -- Caminho de Indicação --> C6;
+        DB_Neo4j -- Rede de Usuários --> C4;
+        C4 -- Sem Indicador --> C5["Fim do Cálculo.
+          Lucro 100% para a casa."];
+
+        C6{Caminho Encontrado?}
+        C6 -- Sim --> C7["Calcular Comissões em Cascata:
+          &#45; 1&#46; Nível 1 (direto): 10% do valor perdido
+          &#45; 2&#46; Nível >1 (indireto): 50% da comissão do nível anterior"];
+        C7 --> C8["Output: Registrar/Armazenar
+          comissões calculadas por usuário"];
+        C6 -- Não --> C5;
+    end
+
+    subgraph "FASE 4: Análise e Consultas"
+        D1["Input: Escolher Consulta Analítica
+          (Ex: 'Qual jogo mais dá lucro?')"] --> D2{Executar Consulta Híbrida};
+        
+        D2 -- Ex: Lucro por Usuário Indicador --> D3["1&#46; Neo4j: Encontrar todos os usuários
+          indicados (diretos/indiretos) por um Influenciador X."];
+        D3 -- Lista de IDs --> D4["2&#46; MongoDB: Buscar todas as apostas
+          perdidas por esses IDs."];
+        D4 -- Apostas Perdidas --> D5["3&#46; Python: Calcular a comissão para X
+          em cada aposta e somar o total."];
+        
+        D2 -- Ex: Lucro por Jogo --> D6["1&#46; MongoDB: Agrupar por 'jogo'&#46;
+          2&#46; Calcular (Soma de Derrotas) - (Soma de Ganhos)"];
+
+        D5 --> D_OUT["Apresentar Resultado
+          (Tabela, Gráfico, Ranking)"];
+        D6 --> D_OUT;
+    end
+
+    %% Ligações entre as Fases
+    A1 & A2 --> B1;
+```
 
 
