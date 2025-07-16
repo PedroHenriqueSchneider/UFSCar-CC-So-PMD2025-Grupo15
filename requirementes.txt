@@ -1,0 +1,7 @@
+﻿pymongo
+neo4j
+matplotlib
+pandas
+faker
+neo4j
+dotenv
