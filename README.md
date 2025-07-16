@@ -116,7 +116,7 @@ Por não enfrentar as limitações dos bancos de dados relacionais, um banco de 
 
 **Problema 1**: A Heterogeneidade dos Dados de Jogos
 
-**O Problema Teórico**: Os jogos simulados são inerentemente diferentes. Uma aposta no Caça-níquel precisa armazenar os símbolos que apareceram nos rolos (ex: reels: ["🍒", "🍒", "🔔"]). Uma aposta em Roleta precisa armazenar a cor ou o número escolhido (ex: tipo_aposta: "cor", valor: "vermelho"). Uma aposta em Blackjack precisa das cartas do jogador e do dealer.
+O Problema Teórico: Os jogos simulados são inerentemente diferentes. Uma aposta no Caça-níquel precisa armazenar os símbolos que apareceram nos rolos (ex: reels: ["🍒", "🍒", "🔔"]). Uma aposta em Roleta precisa armazenar a cor ou o número escolhido (ex: tipo_aposta: "cor", valor: "vermelho"). Uma aposta em Blackjack precisa das cartas do jogador e do dealer.
 
 A Ineficiência de um Banco Relacional (SQL): Em um banco de dados relacional (como MySQL ou PostgreSQL), se tem péssimas opções:
 
@@ -130,11 +130,11 @@ Documento 2 (Roleta): { id_usuario: "456", jogo: "Roleta", valor: 10.00, tipo_ap
 
 Conclusão Teórica: O MongoDB foi escolhido porque seu esquema dinâmico se adapta perfeitamente à natureza heterogênea dos dados das apostas, permitindo armazenar informações variadas em uma única coleção de forma eficiente e organizada, sem a rigidez imposta por um esquema de tabelas fixas.
 
-Problema 2: Alto Volume e Velocidade de Inserção
+**Problema 2**: Alto Volume e Velocidade de Inserção
 
-**O Problema Teórico**: Casas de apostas geram um volume massivo de transações (apostas) em um curto espaço de tempo. A aplicação precisa "escrever" (inserir) dados de forma muito rápida e contínua.
+O Problema Teórico: Casas de apostas geram um volume massivo de transações (apostas) em um curto espaço de tempo. A aplicação precisa "escrever" (inserir) dados de forma muito rápida e contínua.
 
-**A Solução do MongoDB**: MongoDB é projetado para escalabilidade horizontal (sharding). Isso significa que, à medida que o volume de apostas cresce para bilhões de registros, se pode distribuir a coleção de apostas por múltiplos servidores. Isso permite que o sistema mantenha uma alta performance de escrita e leitura, simplesmente adicionando mais máquinas à sua infraestrutura, um processo que é nativamente suportado pelo MongoDB.
+A Solução do MongoDB: MongoDB é projetado para escalabilidade horizontal (sharding). Isso significa que, à medida que o volume de apostas cresce para bilhões de registros, se pode distribuir a coleção de apostas por múltiplos servidores. Isso permite que o sistema mantenha uma alta performance de escrita e leitura, simplesmente adicionando mais máquinas à sua infraestrutura, um processo que é nativamente suportado pelo MongoDB.
 
 ### 2. Análise teórica das escolhas (Neo4j)
    
