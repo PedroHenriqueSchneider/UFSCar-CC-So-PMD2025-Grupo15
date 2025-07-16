@@ -73,7 +73,7 @@ Para que a simulação determine se uma aposta foi vitoriosa ou não, cada jogo 
 
 **Aposta Esportiva**: A vitória é direta e ocorre quando a previsão do jogador se concretiza. O resultado apostado (ex: vitória do Time A) deve ser idêntico ao resultado real. Em apostas mais específicas, o placar exato esperado deve corresponder perfeitamente ao placar exato real da partida.
 
-![Meme da Loteria](https://media.tenor.com/j1d_y11h2lAAAAAC/lottomeme.gif)
+https://media.tenor.com/j1d_y11h2lAAAAAC/lottomeme.gif
 
 # Objetivos
 
