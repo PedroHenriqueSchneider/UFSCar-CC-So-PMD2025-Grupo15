@@ -379,14 +379,24 @@ As fontes de dados serão obtidas de diversas formas e de diversas fontes, usare
 
 ### Consultas possíveis:
 
-1. Quais jogos mais dão lucro para a BET?  
-2. Quais são os usuários que mais receberam dinheiro a partir da perda dos outros?  
-3. Quais são os usuários que mais receberam dinheiro somente a partir de apostas? Pode ser interessante para identificar se um usuário está utilizando métodos ilícitos para ganhar as apostas.  
-4. Qual usuário conseguiu trazer mais novos usuários diretos?  
-5. Qual a porcentagem de usuários que utilizam código?  
-6. Qual a porcentagem de vitória para cada jogo?  
-7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?  
+# OBS: As consultas estão no arquivo implementation.py
+
+1. Quais jogos mais dão lucro para a BET?
+<img width="992" height="697" alt="image" src="https://github.com/user-attachments/assets/14650585-a57f-4c51-943f-a76b402b05cc" />
+2. Quais são os usuários que mais receberam dinheiro a partir da perda dos outros?
+<img width="1917" height="972" alt="image" src="https://github.com/user-attachments/assets/2210f2c1-c20e-4c0d-b4aa-427b4c7e126f" />
+3. Quais são os usuários que mais receberam dinheiro somente a partir de apostas? Pode ser interessante para identificar se um usuário está utilizando métodos ilícitos para ganhar as apostas.
+<img width="1916" height="873" alt="image" src="https://github.com/user-attachments/assets/712414f6-b9ae-4a41-927d-d74e1f4b1ac0" />
+4. Qual usuário conseguiu trazer mais novos usuários diretos?
+<img width="1497" height="887" alt="image" src="https://github.com/user-attachments/assets/85511195-954a-47af-90ac-e8f7fe4b529b" />
+5. Qual a porcentagem de usuários que utilizam código?
+<img width="527" height="42" alt="image" src="https://github.com/user-attachments/assets/57af53f5-78ce-4ec8-b966-b8e21c8d4f42" />
+6. Qual a porcentagem de vitória para cada jogo?
+<img width="1238" height="826" alt="image" src="https://github.com/user-attachments/assets/6f6ad142-ad14-4356-8498-970a74bc740e" />
+7. Qual usuário conseguiu trazer mais novos usuários diretos e indiretos?
+<img width="1247" height="827" alt="image" src="https://github.com/user-attachments/assets/91d072aa-488a-4dec-8aa7-6cd99e2f2f4e" />
 8. Quanto um usuário específico já ganhou por conta de perdas de usuários que usam seu cupom?
+<img width="1243" height="827" alt="image" src="https://github.com/user-attachments/assets/fa55c1b5-32f4-4c12-b122-44fd12611fe0" />
 
 # Conclusões
 
