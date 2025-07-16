@@ -45,7 +45,7 @@ def generate_random_bet():
         max_count = max(counts.values())
         porcentagem_vitoria = round(max_count / 5, 2)
 
-        cliente_ganhou = (max_count >= 2)
+        cliente_ganhou = (max_count >= 4)
         dados_variaveis = {
             'porcentagem_vitoria': porcentagem_vitoria,
             'reels': reels,

@@ -599,7 +599,8 @@ while True:
     elif escolha == 7:
         consulta7_quem_mais_indicou()
     elif escolha == 8:
-        consulta8_quanto_influencer_ganhou()
+        influencer_input = input("Qual o nome do influencer? ")
+        consulta8_quanto_influencer_ganhou(influencer_input)
     elif escolha == 0:
         print("Saindo do programa. Até mais!")
         break
