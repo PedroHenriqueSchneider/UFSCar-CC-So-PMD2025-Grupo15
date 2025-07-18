@@ -6,6 +6,7 @@ Curso: Bacharelado em Ciência da Computação
 Disciplina: Processamento massivo de banco de dados
 
 Professora: Profa. Dra. Sahudy Montenegro González
+
 ----------------------------------------------------
 Grupo 15
 Integrantes:
