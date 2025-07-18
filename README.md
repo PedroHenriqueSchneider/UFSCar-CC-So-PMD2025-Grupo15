@@ -1,13 +1,17 @@
+Projeto de disciplina - Casa de apostas \- BETs - O universo dos cassinos digitais / Projeto prático
+====================================================================================================
 **Universidade Federal de São Carlos \-**   
-Bacharelado em Ciência da Computação 
+Curso: Bacharelado em Ciência da Computação 
 
-Processamento massivo de banco de dados
+Disciplina: Processamento massivo de banco de dados
 
-Prof. Dra. Sahudy Montenegro González
-
+Professora: Profa. Dra. Sahudy Montenegro González
+----------------------------------------------------
+Grupo 15
+Integrantes:
 Pedro Henrique Bianco Schneider \- 800467  
 Nicolas Benitiz \- 813037
-
+----------------------------------------------------
 Sorocaba 
 16/07/2025
 
